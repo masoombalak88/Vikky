@@ -45,6 +45,7 @@ yt-dlp
 youtube-search
 youtube-search-python
 gtts
+uvloop
 git+https://github.com/AsmSafone/SafoneAPI
 lexica-api==1.5.1
 httpx==0.25.2
