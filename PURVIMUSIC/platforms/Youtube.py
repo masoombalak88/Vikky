@@ -212,6 +212,12 @@ class YouTubeAPI:
         return title, duration_min, thumbnail, vidid
     async def get_video_info_from_eric(self, url: str):
         api_url = "http://65.0.118.98/api/youtube.php"
+        params = {
+            "url": url,
+            "format": "video",
+            "download": True,
+            "api_key": "spiderkey"
+        }
         
         async with httpx.AsyncClient() as client:
             response = await client.get(api_url, params=params, timeout=150)
