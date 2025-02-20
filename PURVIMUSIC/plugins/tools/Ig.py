@@ -1,67 +1,79 @@
-import os
-import future
-import asyncio
+import re
 import requests
-import wget
-import time
-import yt_dlp
-from urllib.parse import urlparse
+from pyrogram import filters
 from PURVIMUSIC import app
-from pyrogram import Client, filters
-from pyrogram.types import Message
+from config import LOGGER_ID
+
+INSTAGRAM_API = "https://api.bhawanigarg.com/social/instagram/?url="  # Primary API URL
 
 
-# ------------------------------------------------------------------------------- #
+@app.on_message(filters.command(["ig", "instagram", "reel"]))
+async def download_instagram_video(client, message):
+    if len(message.command) < 2:
+        await message.reply_text("Please provide the Instagram reel URL after the command.")
+        return
 
+    # Extract and validate the Instagram URL
+    url = message.text.split()[1]
+    if not re.match(r"^(https?://)?(www\.)?(instagram\.com|instagr\.am)/(p|reel|tv|stories)/.*$", url):
+        await message.reply_text("The provided URL is not a valid Instagram URL.")
+        return
 
-                     #   INSTAGRAM REELS LELO SAB  #
-        
+    a = await message.reply_text("Processing your request...")
 
-# ------------------------------------------------------------------------------- #
-
-
-@app.on_message(filters.command(["ig"], ["/", "!", "."]))
-async def download_instareels(c: app, m: Message):
     try:
-        reel_ = m.command[1]
-    except IndexError:
-        await m.reply_text("Give me an link to download it...")
-        return
-    if not reel_.startswith("https://www.instagram.com/reel/"):
-        await m.reply_text("In order to obtain the requested reel, a valid link is necessary. Kindly provide me with the required link.")
-        return
-    OwO = reel_.split(".",1)
-    Reel_ = ".dd".join(OwO)
-    try:
-        await m.reply_video(Reel_)
-        return
-    except Exception:
-        try:
-            await m.reply_photo(Reel_)
+        # Make API request
+        response = requests.get(f"{INSTAGRAM_API}{url}", timeout=10)
+        if response.status_code != 200:
+            await a.edit("The API is not responding or returned an error. Please try again later.")
             return
-        except Exception:
-            try:
-                await m.reply_document(Reel_)
-                return
-            except Exception:
-                await m.reply_text("I am unable to reach to this reel.")
+
+        # Parse the API response
+        result = response.json()
+        if result.get("error"):
+            await a.edit(f"API Error: {result.get('message', 'Unknown error occurred.')}")
+            return
+
+        # Extract video details
+        data = result.get("result")
+        if not data or not data.get("url"):
+            await a.edit("Failed to fetch the video details. The API might not support this URL.")
+            return
+
+        video_url = data["url"]
+        duration = data.get("duration", "Unknown")
+        quality = data.get("quality", "Unknown")
+        file_type = data.get("extension", "Unknown")
+        size = data.get("formattedSize", "Unknown")
+
+        # Prepare caption
+        caption = (
+            f"Duration: {duration}\n"
+            f"Quality: {quality}\n"
+            f"Type: {file_type}\n"
+            f"Size: {size}"
+        )
+
+        await a.delete()
+        await message.reply_video(video_url, caption=caption)
+
+    except requests.exceptions.Timeout:
+        await a.edit("The API request timed out. Please try again later.")
+
+    except requests.exceptions.RequestException as e:
+        await a.edit(f"Request failed: {str(e)}")
+        await app.send_message(LOGGER_ID, f"Request Exception: {str(e)}")
+
+    except Exception as e:
+        await a.edit("An unexpected error occurred.")
+        await app.send_message(LOGGER_ID, f"Unexpected Error: {str(e)}")
 
 
-@app.on_message(filters.command(["reel"], ["/", "!", "."]))
-async def instagram_reel(client, message):
-    if len(message.command) == 2:
-        url = message.command[1]
-        response = requests.post(f"https://lexica-api.vercel.app/download/instagram?url={url}")
-        data = response.json()
+MODULE = "IG-Reel"
+HELP = """
+Instagram Reel Downloader:
 
-        if data['code'] == 2:
-            media_urls = data['content']['mediaUrls']
-            if media_urls:
-                video_url = media_urls[0]['url']
-                await message.reply_video(f"{video_url}")
-            else:
-                await message.reply("No video found in the response. may be accountbis private.")
-        else:
-            await message.reply("Request was not successful.")
-    else:
-        await message.reply("Please provide a valid Instagram URL using the /reels command.")
+• /ig [URL]: Download Instagram reels.
+• /instagram [URL]: Download Instagram reels.
+• /reel [URL]: Download Instagram reels.
+"""
