@@ -1,43 +1,35 @@
 import random
-import requests
+from nickname_generator import generate
 from pyrogram import Client, filters
 from PURVIMUSIC import app
 
-# URL for Fancy Text Generator API from RapidAPI (replace with actual URL after signing up)
-FONT_API_URL = "https://fancy-text-generator1.p.rapidapi.com/fancy-text"  # Example, you need to replace it
-API_KEY = "1fd96a58c9mshe95230528fa4667p16c1d2jsn1df774c94c22"  # Replace with your API key from RapidAPI
+# Function to generate stylish nicknames using the nickname-generator library
+def get_stylish_names(name):
+    stylish_names = []
+    for _ in range(10):  # Generate 10 different stylish names
+        # Here, we're using the nickname-generator library to create stylish names
+        # You can modify this line to create more stylized names based on your needs
+        nickname = generate()
+        stylish_names.append(nickname)
+    return stylish_names
 
 @app.on_message(filters.text)
-def insert_name(client, message):
+def suggest_nicknames(client, message):
+    # Get the text from the user (the name)
     name = message.text.strip()
-    if not name:
-        message.reply("Please send a name.")
+
+    # If the name is empty or too short, ask the user to provide a valid name
+    if not name or len(name) < 2:
+        message.reply("Please provide a valid name!")
         return
 
-    # Call the Fancy Text Generator API to get a random font
-    headers = {
-        "X-RapidAPI-Key": API_KEY,
-        "X-RapidAPI-Host": "fancy-text-generator1.p.rapidapi.com"
-    }
+    # Get random stylish names for the provided name
+    stylish_names = get_stylish_names(name)
 
-    # Make API request
-    try:
-        response = requests.get(FONT_API_URL, headers=headers, params={"text": name})
-        if response.status_code == 200:
-            # Extract the random font from the response
-            font_data = response.json()  # Assuming the response is in JSON format
-            if font_data and 'fancy_text' in font_data:
-                random_font = font_data['fancy_text']
-
-                # Insert the name in the middle of the font (modify this logic based on the API response structure)
-                mid_point = len(random_font) // 2
-                new_text = random_font[:mid_point] + name + random_font[mid_point:]
-
-                # Send the modified text back
-                message.reply(new_text)
-            else:
-                message.reply("Could not retrieve a random font.")
-        else:
-            message.reply("Failed to fetch font from the generator.")
-    except Exception as e:
-        message.reply(f"Error while fetching font: {e}")
+    if stylish_names:
+        # Send the list of 10 stylish names as a message to the user
+        response = "Here are 10 stylish nicknames for you:\n\n"
+        response += "\n".join(stylish_names)
+        message.reply(response)
+    else:
+        message.reply("Sorry, I couldn't fetch stylish nicknames at the moment. Please try again later.")
