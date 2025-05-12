@@ -9,7 +9,7 @@ import httpx
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 from aiofiles.os import path as aiopath
 
-
+from src.helpers import CachedTrack
 from PURVIMUSIC import LOGGER
 
 FONTS = {
@@ -161,7 +161,7 @@ def get_duration(duration: int, time: str = "0:24") -> str:
         return "0:00"
 
 
-async def gen_thumb(song: videoid) -> str:
+async def gen_thumb(song: CachedTrack) -> str:
     """
     Generates and saves a thumbnail for the song.
     """
