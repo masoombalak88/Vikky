@@ -9,7 +9,7 @@ import httpx
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 from aiofiles.os import path as aiopath
 
-from src.helpers import CachedTrack
+from PURVIMUSIC.utils import CachedTrack
 from PURVIMUSIC import LOGGER
 
 FONTS = {
