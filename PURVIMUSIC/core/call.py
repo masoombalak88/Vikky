@@ -36,7 +36,7 @@ from PURVIMUSIC.utils.exceptions import AssistantErr
 from PURVIMUSIC.utils.formatters import check_duration, seconds_to_min, speed_converter
 from PURVIMUSIC.utils.inline.play import stream_markup
 from PURVIMUSIC.utils.stream.autoclear import auto_clean
-from PURVIMUSIC.utils.thumbnails import get_thumb
+from PURVIMUSIC.utils.thumbnails import gen_thumb
 from strings import get_string
 
 autoend = {}
