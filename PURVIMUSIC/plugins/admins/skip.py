@@ -9,7 +9,7 @@ from PURVIMUSIC.utils.database import get_loop
 from PURVIMUSIC.utils.decorators import AdminRightsCheck
 from PURVIMUSIC.utils.inline import close_markup, stream_markup
 from PURVIMUSIC.utils.stream.autoclear import auto_clean
-from PURVIMUSIC.utils.thumbnails import get_thumb
+from PURVIMUSIC.utils.thumbnails import gen_thumb
 from config import BANNED_USERS
 
 
